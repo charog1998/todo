@@ -6,7 +6,7 @@ class BaseModel(db.Model):
     """
     __abstract__ = True
 
-    add_date = db.Column(db.DateTime, nullable=True, default=datetime.now, ) # 创建时间
+    add_date = db.Column(db.DateTime, nullable=True, default=datetime.now) # 创建时间
     pub_date = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=True) # 更新时间
 
 

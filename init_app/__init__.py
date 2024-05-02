@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from init_app.settings import BASE_DIR
 from flask_migrate import Migrate
-# from settings import BASE_DIR
+
 migrate = Migrate()
 
 db = SQLAlchemy()
@@ -20,7 +20,6 @@ def create_app(test_config=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
-    #login_manager.init_app(app)
 
     # 注册视图
     register_bp(app)
@@ -38,5 +37,4 @@ def register_bp(app:Flask):
     app.register_blueprint(plan.bp) 
     # 注册蓝图
     app.register_blueprint(auth.bp) 
-    # app.register_blueprint(admin.bp)
     app.add_url_rule(rule='/', endpoint='index', view_func=plan.index)

@@ -107,4 +107,3 @@ def login_required(view):
 def index():
     # 主页
     return redirect(url_for('plan.index'))
-    # return render_template('index.html')
