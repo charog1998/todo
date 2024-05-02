@@ -1,0 +1,249 @@
+{% extends 'index.html' %}
+
+{% block title %} - {{ planList.title }} {% endblock title %}
+
+{% block extra_header %}
+<link rel="stylesheet" href="{{ url_for('plan.static', filename='css/bootstrap-datetimepicker.min.css') }}">
+{% endblock %}
+
+{% block extra_breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">{{ planList.title }}{{ " : "+planList.startTime.strftime("%Y-%m-%d")+" ~ "+planList.deadLineTime.strftime("%Y-%m-%d") }}</li>
+{% endblock %}
+
+{% block main_content %}
+<div class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3  d-flex justify-content-center">
+        <div class="card mb-3 flex-fill">
+          <div class="card-body d-flex justify-content-center">
+            <button type="button" class="btn btn-primary align-self-center" data-toggle="modal" data-target="#staticBackdrop">
+              新建计划
+            </button>
+            <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">新建计划</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <form class="pt-3 w-100 " method="post" action="{{ url_for('plan.add_plan', planList_id=planList.id) }}">
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label for="title">主题</label>
+                        <input type="text" class="form-control form-control-lg" id="title" placeholder="主题" name="title"
+                          required="required">
+                      </div>
+                      <div class="form-group">
+                        <label for="description">描述</label>
+                        <textarea type="text" class="form-control form-control-lg" style="height: 100px;resize: none;"
+                          id="description" placeholder="描述" name="description" required="required"></textarea>
+                      </div>
+                      <div class="form-group">
+                        <label for="startTime">起始时间</label>
+                        <input type="text" class="form-control form-control-lg" id="startTime" placeholder="XXXX-XX-XX" value="{{ planList.startTime }}"
+                          name="startTime" required="required">
+                      </div>
+                      <div class="form-group">
+                        <label for="deadLineTime">结束时间</label>
+                        <input type="text" class="form-control form-control-lg" id="deadLineTime" value="{{ planList.deadLineTime }}"
+                          placeholder="XXXX-XX-XX" name="deadLineTime" required="required">
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <input class="btn btn-primary font-weight-medium" type="submit" value="提交">
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    
+      {% for plan in plans %}
+      <div class="col-md-3">
+        <div class="card mb-3 shadow-sm d-flex justify-content-between">
+          {% if plan.completedStatus == 0 %}
+          <h5 class="card-header font-weight-bold">{{ plan.title }}</h5>
+          {% else %}
+          <del><h5 class="card-header text-muted">{{ plan.title }}</h5></del>
+          {% endif %}
+          <div class="card-body">
+            <h6 class="card-subtitle mb-2 text-muted">{{ plan.startTime.strftime("%Y-%m-%d")+" ~ "+plan.deadLineTime.strftime("%Y-%m-%d") }}</h6>
+            <p class="card-text overflow-auto" style="height: 100px;">{{ plan.description }}</p>
+            <div class="row d-flex justify-content-around">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateBackdrop{{ plan.id }}">
+              编辑
+            </button>
+            <div class="modal fade" id="updateBackdrop{{ plan.id }}" data-backdrop="static" data-keyboard="false" tabindex="-1"
+              aria-labelledby="updateBackdropLabel{{ plan.id }}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="updateBackdropLabel{{ plan.id }}">编辑</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <form class="pt-3 w-100 " method="post"
+                    action="{{ url_for('plan.update_plan', planList_id=planList.id,plan_id=plan.id) }}">
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label for="title">主题</label>
+                        <input type="text" class="form-control form-control-lg" id="title" placeholder="主题" name="title"
+                          required="required" value="{{ plan.title }}">
+                      </div>
+                      <div class="form-group">
+                        <label for="description">描述</label>
+                        <textarea type="text" class="form-control form-control-lg" style="height: 100px;resize: none;"
+                          id="description" placeholder="描述" name="description"
+                          required="required">{{ plan.description }}</textarea>
+                      </div>
+                      <div class="form-group">
+                        <label for="startTime">起始时间</label>
+                        <input type="text" class="form-control form-control-lg" id="startTime{{ plan.id }}" placeholder="XXXX-XX-XX"
+                          name="startTime" required="required" value="{{ plan.startTime }}">
+                      </div>
+                      <div class="form-group">
+                        <label for="deadLineTime">结束时间</label>
+                        <input type="text" class="form-control form-control-lg" id="deadLineTime{{ plan.id }}"
+                          placeholder="XXXX-XX-XX" name="deadLineTime" required="required"
+                          value="{{ plan.deadLineTime }}">
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <input class="btn btn-primary font-weight-medium" type="submit" value="提交">
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% if plan.completedStatus == 0 %}
+            <a class="btn btn-success" href="{{ url_for('plan.change_status', planList_id=planList.id,plan_id=plan.id,status=1) }}">完成</a>
+          {% else %}
+          <a class="btn btn-success" href="{{ url_for('plan.change_status', planList_id=planList.id,plan_id=plan.id,status=0) }}">未完成</a>
+          {% endif %}
+            
+            
+
+            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteBackdrop{{ plan.id }}">
+              删除
+            </button>
+            <div class="modal fade" id="deleteBackdrop{{ plan.id }}" data-backdrop="static" data-keyboard="false" tabindex="-1"
+              aria-labelledby="deleteBackdropLabel{{ plan.id }}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="deleteBackdroppLabel{{ plan.id }}">删除</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <form class="pt-3 w-100 " method="post"
+                    action="{{ url_for('plan.del_plan', planList_id=planList.id,plan_id=plan.id) }}">
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <p>您确定要删除计划列表<label class="font-weight-bold">“{{ plan.title }}”</label>么?</p>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <input class="btn btn-primary font-weight-medium" type="submit" value="确定">
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            </div>
+
+            
+
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+
+
+<div class="container fixed-bottom">
+  <div class="row d-flex justify-content-center">
+  <nav aria-label="pagination">
+    <ul class="pagination pagination-lg">
+    {% if pagination.has_prev %}
+    <li class="page-item"><a href="{{ url_for('plan.sel_plans', planList_id=planList.id) }}?page={{ pagination.prev_num }}" class="page-link">上一页</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><a href="#" class="page-link">上一页</a>
+    </li>
+    {% endif %}
+    
+
+      {% for page in pagination.iter_pages() %}
+      {% if page %}
+        {% if page != pagination.page %}
+          <li class="page-item">
+            <a href="{{ url_for('plan.sel_plans', planList_id=planList.id) }}?page={{ page }}" class="page-link" aria-label="Page 1"
+            aria-current="page">{{ page }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <a class="page-link is-current" aria-label="Page 1" aria-current="page">{{ page }}</a>
+          </li>
+        {% endif %}
+      {% else %}
+      <li class="page-item disabled"><a class="page-link">&hellip;</a></li>
+      
+      {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+    <li class="page-item"><a href="{{ url_for('plan.sel_plans', planList_id=planList.id) }}?page={{ pagination.next_num }}" class="page-link">下一页</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><a href="#" class="page-link">下一页</a>
+    </li>
+    {% endif %}
+
+    </ul>
+  </nav>
+  </div>
+  <div class="row d-flex justify-content-center">
+    <p class="text-white">小朱 2024.05</p>
+  </div>
+  </div>
+
+
+{% endblock %}
+
+{% block extra_script %}
+<script src="{{ url_for('plan.static', filename='js/moment.js') }}"></script>
+<script src="{{ url_for('plan.static', filename='js/bootstrap-datetimepicker.min.js') }}"></script>
+<script type="text/javascript">
+  $(function () {
+    $('#startTime').datetimepicker({
+      format: 'YYYY-MM-DD',
+    });
+  });
+  $(function () {
+    $('#deadLineTime').datetimepicker({
+      format: 'YYYY-MM-DD',
+      MinDate: $('#startTime').datetimepicker.Value
+    });
+  });
+
+  $("input[id^='startTime']").each(function () {
+    $(this).datetimepicker({format: 'YYYY-MM-DD',});
+})
+$("input[id^='deadLineTime']").each(function () {
+    $(this).datetimepicker({format: 'YYYY-MM-DD',});
+})
+  
+</script>
+{% endblock %}

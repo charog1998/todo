@@ -1,0 +1,12 @@
+.full-page-background {
+    background-image: url('../img/background.jpg'); /* 替换为你的图片路径 */
+    background-repeat: no-repeat;
+    background-size: cover; /* 或者 100% 100% 根据需求 */
+    background-position: center center;
+    height: 100vh; /* 视口高度 */
+    width: 100vw; /* 视口宽度 */
+    position: fixed; /* 固定位置 */
+    top: 0;
+    left: 0;
+    z-index: -99; /* 确保背景在内容下方 */
+}

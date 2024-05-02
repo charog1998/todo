@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %} -登录 {% endblock title %}
+
+{% block content %}
+<div class="row w-100 d-flex justify-content-center align-items-center">
+  <div class="col-lg-4 mx-auto">
+<form class="pt-3  w-100" method="post" action="{{ url_for('auth.login') }}">
+  <div class="form-group">
+    <label for="exampleInputUsername1">用户名</label>
+    <input type="text" class="form-control form-control-lg" id="exampleInputUsername1" placeholder="Username" name="username" required="required">
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">密码</label>
+    <input type="password" class="form-control form-control-lg" id="exampleInputPassword1" placeholder="Password" name="password" required="required">
+  </div>
+  <div class="mt-3">
+    <input class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn" type="submit" value="登录"></a>
+  </div>
+  <div class="text-center mt-4 font-weight-light">
+    还没有账号？ <a href="{{ url_for('auth.register') }}" class="text-primary">去注册</a>
+  </div>
+</form>
+</div>
+</div>
+{% endblock %}
