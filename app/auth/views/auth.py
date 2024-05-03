@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ..models import auth,User
 from init_app import db
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ..models import Plan, PlanList
 from app.auth.views.auth import login_required
 from init_app import db
