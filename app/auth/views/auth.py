@@ -134,7 +134,7 @@ def index():
 def getUserList():
     # 获取用户列表
     # 临时使用，为了方便调试
-    if session.get("user_id") == 2:
+    if session.get("user_id") == 1:
         userList = []
         result = User.query.all()
         for user in result:
