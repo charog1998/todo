@@ -3,19 +3,15 @@ from ..models import Plan, PlanList
 from app.auth.views.auth import login_required
 from init_app import db
 
-import functools
-
 from flask import (
     Blueprint,
     flash,
-    g,
     redirect,
     render_template,
     request,
     session,
     url_for,
 )
-from werkzeug.security import check_password_hash, generate_password_hash
 
 from datetime import datetime
 
@@ -32,14 +28,24 @@ bp = Blueprint(
 @bp.route("/")
 @login_required
 def index():
-    # 主页
+    """
+    主页
+    """
     page = request.args.get("page", 1, type=int)
+
+    # 查询出此用户创建的所有PlanList
+    # 按照结束时间进行排序
+    # 利用paginate进行分页，每页7条记录
     pagination = (
         PlanList.query.filter_by(createBy=session.get("user_id"))
         .order_by(PlanList.deadLineTime)
         .paginate(page=page, per_page=7, error_out=False)
     )
+
+    # 获取到当前分页的内容pagination.items
     planList_List = pagination.items
+
+    # 用分页器和分页内容去渲染模板
     return render_template(
         "planList.html", planLists=planList_List, pagination=pagination
     )
@@ -52,14 +58,19 @@ def add_list():
     if request.method == "POST":
         title = request.form["title"]
         description = request.form["description"]
+
+        # 对前端回传的字符串形式的时间进行格式化，转换成datetime对象用于传入数据库
         startTime = datetime.strptime(request.form["startTime"], "%Y-%m-%d").date()
         deadLineTime = datetime.strptime(
             request.form["deadLineTime"], "%Y-%m-%d"
         ).date()
+
         createBy = session.get("user_id")
         error = None
 
+        # 到数据库中查重
         planList_tmp = PlanList.query.filter_by(title=title, createBy=createBy).first()
+
         if planList_tmp:
             error = f"此主题：“{title}”已经存在了！"
         elif not title:
@@ -90,7 +101,14 @@ def add_list():
 @bp.route("/delPlanList/<int:planList_id>", methods=["GET", "POST"])
 @login_required
 def del_list(planList_id):
-    # 删除分类
+    '''
+    按指定的planList_id进行删除
+
+    参数
+    ----
+    planList_id
+        要删除的PlanList的id
+    '''
     flashDict = {}
     planList = PlanList.query.filter_by(
         id=planList_id, createBy=session.get("user_id")
@@ -106,11 +124,24 @@ def del_list(planList_id):
 @bp.route("/updatePlanList/<int:planList_id>", methods=["POST"])
 @login_required
 def update_list(planList_id):
-    # 更新列表信息
+    '''
+    按指定的planList_id进行更新删除
+
+    参数
+    ----
+    planList_id
+        要更新的PlanList的id
+
+    TODO
+    ----
+    尝试着用update方法结果报错了，只能使用先删除再新增的方式去操作，这里应该可以优化的
+    '''
     flashDict = {}
     if request.method == "POST":
         title = request.form["title"]
         description = request.form["description"]
+
+        # 对前端回传的字符串形式的时间进行格式化，转换成datetime对象用于传入数据库
         startTime = datetime.strptime(request.form["startTime"], "%Y-%m-%d").date()
         deadLineTime = datetime.strptime(
             request.form["deadLineTime"], "%Y-%m-%d"
@@ -161,14 +192,16 @@ def update_list(planList_id):
 @bp.route("/plans/<int:planList_id>")
 @login_required
 def sel_plans(planList_id):
-    # 计划列表主页
+    '''
+    进入PlanList之后的主页，基本思路和PlanList一样，这里偷懒了
+    '''
     planList = PlanList.query.filter_by(
         createBy=session.get("user_id"), id=planList_id
     ).first()
     page = request.args.get("page", 1, type=int)
     pagination = (
         Plan.query.filter_by(createBy=session.get("user_id"), belongTo=planList_id)
-        .order_by(Plan.completedStatus,Plan.deadLineTime,Plan.title)
+        .order_by(Plan.completedStatus, Plan.deadLineTime, Plan.title)
         .paginate(page=page, per_page=7, error_out=False)
     )
     plan_List = pagination.items
@@ -180,6 +213,9 @@ def sel_plans(planList_id):
 @bp.route("/addPlan/<int:planList_id>", methods=(["POST"]))
 @login_required
 def add_plan(planList_id):
+    '''
+    新增Plan
+    '''
     flashDict = {}
     if request.method == "POST":
         title = request.form["title"]
@@ -199,7 +235,10 @@ def add_plan(planList_id):
             error = f"此主题：“{title}”已经存在了！"
         elif not title:
             error = "标题不能为空！"
-        elif startTime < planList_tmp.startTime.date() or deadLineTime > planList_tmp.deadLineTime.date():
+        elif (
+            startTime < planList_tmp.startTime.date()
+            or deadLineTime > planList_tmp.deadLineTime.date()
+        ):
             error = "计划的时间范围超过了计划列表的时间范围！"
         elif startTime > deadLineTime:
             error = "结束时间不能早于起始时间！"
@@ -212,7 +251,7 @@ def add_plan(planList_id):
                     deadLineTime=deadLineTime,
                     createBy=createBy,
                     belongTo=belongTo,
-                    completedStatus=0
+                    completedStatus=0,
                 )
                 db.session.add(plan)
                 db.session.commit()
@@ -229,7 +268,9 @@ def add_plan(planList_id):
 @bp.route("/delPlan/<int:planList_id>/<int:plan_id>", methods=["GET", "POST"])
 @login_required
 def del_plan(planList_id, plan_id):
-    # 删除分类
+    '''
+    删除Plan
+    '''
     flashDict = {}
     plan = Plan.query.filter_by(id=plan_id, createBy=session.get("user_id")).first()
     if plan:
@@ -240,11 +281,14 @@ def del_plan(planList_id, plan_id):
         return redirect(
             url_for("plan.sel_plans", planList_id=planList_id, plan_id=plan_id)
         )
-    
+
+
 @bp.route("/updatePlan/<int:planList_id>/<int:plan_id>", methods=["POST"])
 @login_required
 def update_plan(planList_id, plan_id):
-    # 编辑
+    '''
+    编辑Plan
+    '''
     flashDict = {}
     if request.method == "POST":
         title = request.form["title"]
@@ -265,7 +309,10 @@ def update_plan(planList_id, plan_id):
                 error = f"此主题：“{title}”已经存在了！"
         elif not title:
             error = "标题不能为空！"
-        elif startTime < planList_tmp.startTime.date() or deadLineTime > planList_tmp.deadLineTime.date():
+        elif (
+            startTime < planList_tmp.startTime.date()
+            or deadLineTime > planList_tmp.deadLineTime.date()
+        ):
             error = "计划的时间范围超过了计划列表的时间范围！"
         elif startTime > deadLineTime:
             error = "结束时间不能早于起始时间！"
@@ -279,7 +326,7 @@ def update_plan(planList_id, plan_id):
                     deadLineTime=deadLineTime,
                     createBy=createBy,
                     belongTo=belongTo,
-                    completedStatus=plan_tmp.completedStatus
+                    completedStatus=plan_tmp.completedStatus,
                 )
                 db.session.delete(
                     Plan.query.filter_by(
@@ -295,37 +342,44 @@ def update_plan(planList_id, plan_id):
                 flashDict["success"] = "修改计划成功"
         flashDict["error"] = error
         flash(flashDict)
-    return redirect(url_for("plan.sel_plans",planList_id=planList_id))
+    return redirect(url_for("plan.sel_plans", planList_id=planList_id))
 
 
-@bp.route("/changeStatus/<int:planList_id>/<int:plan_id>", methods=["GET","POST"])
+@bp.route("/changeStatus/<int:planList_id>/<int:plan_id>", methods=["GET", "POST"])
 @login_required
 def change_status(planList_id, plan_id):
+    '''
+    更新Plan的状态为status参数的值
+    1、已完成；0、未完成
+    '''
     status = request.args.get("status", type=int)
     flashDict = {}
     try:
-        plan_tmp = Plan.query.filter_by(id=plan_id, createBy=session.get("user_id")).first()
+        plan_tmp = Plan.query.filter_by(
+            id=plan_id, createBy=session.get("user_id")
+        ).first()
+
+        # 创建更新后的plan
         plan = Plan(
-                    id=plan_id,
-                    title=plan_tmp.title,
-                    description=plan_tmp.description,
-                    startTime=plan_tmp.startTime,
-                    deadLineTime=plan_tmp.deadLineTime,
-                    createBy=plan_tmp.createBy,
-                    belongTo=plan_tmp.belongTo,
-                    completedStatus=status
-                )
+            id=plan_id,
+            title=plan_tmp.title,
+            description=plan_tmp.description,
+            startTime=plan_tmp.startTime,
+            deadLineTime=plan_tmp.deadLineTime,
+            createBy=plan_tmp.createBy,
+            belongTo=plan_tmp.belongTo,
+            completedStatus=status,
+        )
         db.session.delete(
-                    Plan.query.filter_by(
-                        id=plan_id, createBy=session.get("user_id")
-                    ).first()
-                )
+            Plan.query.filter_by(id=plan_id, createBy=session.get("user_id")).first()
+        )
         db.session.add(plan)
         db.session.commit()
     except Exception as e:
         error = f"计划：“{plan_tmp.title}”修改失败。"
         db.session.rollback()
     else:
-        flashDict["success"] = "修改计划成功"    
+        flashDict["success"] = "修改计划成功"
 
-    return redirect(url_for("plan.sel_plans",planList_id=planList_id))
+    # 重定向至plan的首页
+    return redirect(url_for("plan.sel_plans", planList_id=planList_id))

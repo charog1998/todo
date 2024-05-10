@@ -3,7 +3,7 @@ from init_app import create_app,db
 
 def init_db():
     '''
-    用于初始化服务器
+    用于初始化数据库
     '''
     app=create_app()
     with app.app_context():

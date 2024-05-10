@@ -15,8 +15,8 @@ class User(BaseModel):
     """用户模型
     """
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(128), unique=True, nullable=False)
-    password = db.Column(db.String(320), nullable=False)
+    username = db.Column(db.String(128), unique=True, nullable=False) # 用户名
+    password = db.Column(db.String(320), nullable=False) # 密码
 
     def __repr__(self):
         return '<User: %r>' % self.username

@@ -34,7 +34,7 @@ class Plan(BaseModel):
     deadLineTime = db.Column(db.DateTime, nullable=False) # 结束时间
     completedStatus = db.Column(db.Integer, nullable=False) # 是否已完成：1、已完成；0、未完成
     createBy = db.Column(db.Integer, nullable=False) # 创建人
-    belongTo = db.Column(db.Integer, nullable=False) # 属于哪个大目标
+    belongTo = db.Column(db.Integer, nullable=False) # 属于哪个PlanList
 
     def __repr__(self):
         return '<Title: %r>' % self.title
