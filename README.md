@@ -1,12 +1,16 @@
 # todo
 24年五一假期为了测试自己学习情况，尝试着搞了个待办清单类的Flask应用，包含简单的注册和登录功能，待办列表分为计划列表和计划两种，可以先创建计划列表然后再在计划列表中创建计划，每一个计划都可以在完成和未完成之间切换。
 
+### 在项目目录下打开终端，`pip3 install -r requirements.txt`安装本项目的依赖
 
-### 直接运行`python3 run.py`可直接开启flask服务器
+如果安装速度较慢可以更换国内的镜像：参考 [PyPI 镜像使用帮助- 清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/help/pypi/)
+
+### 直接运行`python3 run.py`可直接开启flask服务器（此时使用的是`instance/tmp copy.db`文件作为数据源）
 ![](img/run.png)
 
 ### 运行`run.init_db()`可初始化数据库, 创建的Sqlite数据库文件会生成在instance文件夹中。
-### 数据库的链接在`init_app\settings.py`中设置
+
+### 如果需要使用其他数据库可在`init_app\settings.py`中设置
 
 ---
 
@@ -28,6 +32,5 @@
 
 ### 后续计划
 
-1. 为计划列表添加一个进度条，初步设想是已完成的子计划个数/总数
-2. 利用WTF做表单验证
-3. 研究下sqlalchemy的更新方法
+1. 利用WTF做表单验证
+2. 研究下sqlalchemy的更新方法
